@@ -135,7 +135,7 @@ diff -ur a/frameworks/av/include/media/stagefright/ColorConverter.h b/frameworks
 diff -ur a/frameworks/av/media/libstagefright/ACodec.cpp b/frameworks/av/media/libstagefright/ACodec.cpp
 --- a/frameworks/av/media/libstagefright/ACodec.cpp	2016-02-15 14:14:34.100779000 +0000
 +++ b/frameworks/av/media/libstagefright/ACodec.cpp	2016-02-15 14:44:40.628779000 +0000
-@@ -777,6 +777,7 @@
+@@ -762,6 +762,7 @@
  }
  
  status_t ACodec::allocateBuffersOnPort(OMX_U32 portIndex) {
@@ -143,7 +143,7 @@ diff -ur a/frameworks/av/media/libstagefright/ACodec.cpp b/frameworks/av/media/l
      CHECK(portIndex == kPortIndexInput || portIndex == kPortIndexOutput);
  
      CHECK(mDealer[portIndex] == NULL);
-@@ -784,20 +785,21 @@
+@@ -769,20 +770,21 @@
  
      status_t err;
      if (mNativeWindow != NULL && portIndex == kPortIndexOutput) {
@@ -169,7 +169,7 @@ diff -ur a/frameworks/av/media/libstagefright/ACodec.cpp b/frameworks/av/media/l
              MetadataBufferType type =
                  portIndex == kPortIndexOutput ? mOutputMetadataType : mInputMetadataType;
              int32_t bufSize = def.nBufferSize;
-@@ -865,9 +867,11 @@
+@@ -854,9 +856,11 @@
                  mBuffers[portIndex].push(info);
              }
          }
@@ -181,7 +181,7 @@ diff -ur a/frameworks/av/media/libstagefright/ACodec.cpp b/frameworks/av/media/l
          return err;
      }
  
-@@ -875,6 +879,7 @@
+@@ -864,6 +868,7 @@
      notify->setInt32("what", CodecBase::kWhatBuffersAllocated);
  
      notify->setInt32("portIndex", portIndex);
