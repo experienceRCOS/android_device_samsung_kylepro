@@ -106,15 +106,11 @@ diff -ur a/external/sepolicy/domain.te b/external/sepolicy/domain.te
  neverallow { domain -kernel } kernel:security setcheckreqprot;
  
  # No booleans in AOSP policy, so no need to ever set them.
-@@ -323,11 +319,7 @@
+@@ -319,7 +319,7 @@
  
  # Restrict context mounts to specific types marked with
  # the contextmount_type attribute.
--ifelse(shipping_build, `true',
--  `neverallow domain {fs_type -contextmount_type}:filesystem relabelto;'
--,
--  `neverallow domain {fs_type -contextmount_type -sdcard_posix}:filesystem relabelto;'
--)
+-neverallow domain {fs_type -contextmount_type}:filesystem relabelto;
 +neverallow domain {fs_type -contextmount_type -sdcard_posix}:filesystem relabelto;
  
  # Ensure that context mount types are not writable, to ensure that
@@ -189,7 +185,7 @@ diff -ur a/frameworks/av/media/libstagefright/ACodec.cpp b/frameworks/av/media/l
  
      sp<PortDescription> desc = new PortDescription;
  
-@@ -892,14 +897,17 @@
+@@ -881,14 +886,17 @@
  
  status_t ACodec::setupNativeWindowSizeFormatAndUsage(
          ANativeWindow *nativeWindow /* nonnull */, int *finalUsage /* nonnull */) {
@@ -207,37 +203,7 @@ diff -ur a/frameworks/av/media/libstagefright/ACodec.cpp b/frameworks/av/media/l
          return err;
      }
  
-@@ -924,6 +932,20 @@
-     setNativeWindowColorFormat(eNativeColorFormat);
- #endif
- 
-+    ALOGE("ACodec:PATCH:setupNativeWindowSizeFormatAndUsage[%s] def.format.video.eColorFormat(%i)", mComponentName.c_str(), def.format.video.eColorFormat);
-+    OMX_COLOR_FORMATTYPE HalColorFormat;
-+    switch (def.format.video.eColorFormat) {
-+        case OMX_COLOR_FormatYCbYCr:{
-+            HalColorFormat = (OMX_COLOR_FORMATTYPE)HAL_PIXEL_FORMAT_YV12;
-+            ALOGE("ACodec:PATCH:setupNativeWindowSizeFormatAndUsage[%s] def.format.video.eColorFormat NOW (%i)", mComponentName.c_str(), def.format.video.eColorFormat);
-+        }
-+        break;
-+        default:
-+            ALOGE("ACodec:PATCH:setupNativeWindowSizeFormatAndUsage[%s] def.format.video.eColorFormat Default (%i) (OMX_COLOR_FORMATTYPE)HAL_PIXEL_FORMAT_YV12", mComponentName.c_str(), (OMX_COLOR_FORMATTYPE)HAL_PIXEL_FORMAT_YV12);
-+            HalColorFormat = (OMX_COLOR_FORMATTYPE)HAL_PIXEL_FORMAT_YV12;
-+        break;
-+    }
-+
-     ALOGV("gralloc usage: %#x(OMX) => %#x(ACodec)", omxUsage, usage);
-     err = setNativeWindowSizeFormatAndUsage(
-             nativeWindow,
-@@ -932,7 +954,7 @@
- #ifdef USE_SAMSUNG_COLORFORMAT
-             eNativeColorFormat,
- #else
--            def.format.video.eColorFormat,
-+            HalColorFormat,
- #endif
-             mRotationDegrees,
-             usage);
-@@ -961,6 +983,7 @@
+@@ -921,6 +922,7 @@
  status_t ACodec::configureOutputBuffersFromNativeWindow(
          OMX_U32 *bufferCount, OMX_U32 *bufferSize,
          OMX_U32 *minUndequeuedBuffers) {
@@ -245,7 +211,7 @@ diff -ur a/frameworks/av/media/libstagefright/ACodec.cpp b/frameworks/av/media/l
      OMX_PARAM_PORTDEFINITIONTYPE def;
      InitOMXParams(&def);
      def.nPortIndex = kPortIndexOutput;
-@@ -972,6 +995,7 @@
+@@ -932,6 +993,7 @@
          err = setupNativeWindowSizeFormatAndUsage(mNativeWindow.get(), &mNativeWindowUsageBits);
      }
      if (err != OK) {
@@ -253,7 +219,7 @@ diff -ur a/frameworks/av/media/libstagefright/ACodec.cpp b/frameworks/av/media/l
          mNativeWindowUsageBits = 0;
          return err;
      }
-@@ -1694,8 +1718,10 @@
+@@ -1620,8 +1622,10 @@
  
  status_t ACodec::configureCodec(
          const char *mime, const sp<AMessage> &msg) {
@@ -264,7 +230,7 @@ diff -ur a/frameworks/av/media/libstagefright/ACodec.cpp b/frameworks/av/media/l
          encoder = false;
      }
  
-@@ -1710,6 +1736,7 @@
+@@ -1636,6 +1637,7 @@
      status_t err = setComponentRole(encoder /* isEncoder */, mime);
  
      if (err != OK) {
@@ -272,7 +238,7 @@ diff -ur a/frameworks/av/media/libstagefright/ACodec.cpp b/frameworks/av/media/l
          return err;
      }
  
-@@ -1726,6 +1753,7 @@
+@@ -1650,6 +1651,7 @@
      if (encoder
              && msg->findInt32("store-metadata-in-buffers", &storeMeta)
              && storeMeta != 0) {
@@ -280,7 +246,7 @@ diff -ur a/frameworks/av/media/libstagefright/ACodec.cpp b/frameworks/av/media/l
          err = mOMX->storeMetaDataInBuffers(mNode, kPortIndexInput, OMX_TRUE, &mInputMetadataType);
          if (err != OK) {
              ALOGE("[%s] storeMetaDataInBuffers (input) failed w/ err %d",
-@@ -1736,16 +1764,11 @@
+@@ -1660,16 +1662,11 @@
          // For this specific case we could be using camera source even if storeMetaDataInBuffers
          // returns Gralloc source. Pretend that we are; this will force us to use nBufferSize.
          if (mInputMetadataType == kMetadataBufferTypeGrallocSource) {
@@ -299,7 +265,7 @@ diff -ur a/frameworks/av/media/libstagefright/ACodec.cpp b/frameworks/av/media/l
      }
  
      int32_t prependSPSPPS = 0;
-@@ -1753,6 +1776,7 @@
+@@ -1677,6 +1678,7 @@
              && msg->findInt32("prepend-sps-pps-to-idr-frames", &prependSPSPPS)
              && prependSPSPPS != 0) {
          OMX_INDEXTYPE index;
@@ -307,7 +273,7 @@ diff -ur a/frameworks/av/media/libstagefright/ACodec.cpp b/frameworks/av/media/l
          err = mOMX->getExtensionIndex(
                  mNode,
                  "OMX.google.android.index.prependSPSPPSToIDRFrames",
-@@ -1784,7 +1808,7 @@
+@@ -1708,7 +1708,7 @@
          OMX_BOOL enable = (OMX_BOOL) (prependSPSPPS
              && msg->findInt32("store-metadata-in-buffers-output", &storeMeta)
              && storeMeta != 0);
@@ -316,7 +282,7 @@ diff -ur a/frameworks/av/media/libstagefright/ACodec.cpp b/frameworks/av/media/l
          err = mOMX->storeMetaDataInBuffers(mNode, kPortIndexOutput, enable, &mOutputMetadataType);
          if (err != OK) {
              ALOGE("[%s] storeMetaDataInBuffers (output) failed w/ err %d",
-@@ -1794,28 +1818,33 @@
+@@ -1718,28 +1723,33 @@
          if (!msg->findInt64(
                      "repeat-previous-frame-after",
                      &mRepeatFrameDelayUs)) {
@@ -351,7 +317,7 @@ diff -ur a/frameworks/av/media/libstagefright/ACodec.cpp b/frameworks/av/media/l
      // NOTE: we only use native window for video decoders
      sp<RefBase> obj;
      bool haveNativeWindow = msg->findObject("native-window", &obj)
-@@ -1837,7 +1866,7 @@
+@@ -1761,7 +1761,7 @@
      if (haveNativeWindow) {
          sp<ANativeWindow> nativeWindow =
              static_cast<ANativeWindow *>(static_cast<Surface *>(obj.get()));
@@ -360,7 +326,7 @@ diff -ur a/frameworks/av/media/libstagefright/ACodec.cpp b/frameworks/av/media/l
          // START of temporary support for automatic FRC - THIS WILL BE REMOVED
          int32_t autoFrc;
          if (msg->findInt32("auto-frc", &autoFrc)) {
-@@ -1855,13 +1884,13 @@
+@@ -1779,13 +1779,13 @@
              }
          }
          // END of temporary support for automatic FRC
@@ -376,7 +342,7 @@ diff -ur a/frameworks/av/media/libstagefright/ACodec.cpp b/frameworks/av/media/l
              int32_t audioHwSync = 0;
              if (!msg->findInt32("audio-hw-sync", &audioHwSync)) {
                  ALOGW("No Audio HW Sync provided for video tunnel");
-@@ -1885,12 +1914,14 @@
+@@ -1809,12 +1811,14 @@
                      // allow failure
                      err = OK;
                  } else {
@@ -391,7 +357,7 @@ diff -ur a/frameworks/av/media/libstagefright/ACodec.cpp b/frameworks/av/media/l
              ALOGV("Configuring CPU controlled video playback.");
              mTunneled = false;
  
-@@ -1904,6 +1935,7 @@
+@@ -1828,6 +1829,7 @@
              }
  
              // Always try to enable dynamic output buffers on native surface
@@ -399,7 +365,7 @@ diff -ur a/frameworks/av/media/libstagefright/ACodec.cpp b/frameworks/av/media/l
              err = mOMX->storeMetaDataInBuffers(
                      mNode, kPortIndexOutput, OMX_TRUE, &mOutputMetadataType);
              if (err != OK) {
-@@ -1953,8 +1985,10 @@
+@@ -1877,8 +1879,10 @@
                      }
                  }
                  // allow failure
@@ -410,7 +376,7 @@ diff -ur a/frameworks/av/media/libstagefright/ACodec.cpp b/frameworks/av/media/l
                  ALOGV("[%s] storeMetaDataInBuffers succeeded",
                          mComponentName.c_str());
                  CHECK(storingMetadataInDecodedBuffers());
-@@ -1965,6 +1999,7 @@
+@@ -1899,6 +1900,7 @@
              }
  
              int32_t push;
