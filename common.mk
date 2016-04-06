@@ -6,7 +6,7 @@ PRODUCT_LOCALES += hdpi
 PRODUCT_AAPT_CONFIG := normal hdpi xhdpi
 PRODUCT_AAPT_PREF_CONFIG := hdpi
 
-DEVICE_PACKAGE_OVERLAYS += device/samsung/kylepro/overlay
+DEVICE_PACKAGE_OVERLAYS += device/samsung/kylepro/overlay2
 
 # Init files
 PRODUCT_COPY_FILES += \
@@ -107,7 +107,6 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.telephony.ril_class=SamsungBCMRIL \
     persist.radio.multisim.config=none \
     ro.multisim.simslotcount=1 \
-    cm.updater.uri=http://ota.sandpox.org/api \
     ro.telephony.call_ring.multiple=0 \
     camera2.portability.force_api=1 \
     ro.telephony.call_ring=0
@@ -140,14 +139,20 @@ PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
     persist.sys.usb.config=mtp
 
 # Dalvik heap config
-include frameworks/native/build/phone-xhdpi-1024-dalvik-heap.mk
-
-# Texture config.
-include frameworks/native/build/phone-xxhdpi-2048-hwui-memory.mk
+include frameworks/native/build/phone-hdpi-512-dalvik-heap.mk
 
 # Boot animation
 PRODUCT_COPY_FILES += \
      device/samsung/kylepro/bootanimation/bootanimation.zip:system/media/bootanimation.zip
+
+# Packages
+PRODUCT_PACKAGES += \
+    CellBroadcastReceiver \
+    charger_res_images \
+    Launcher3 \
+    SamsungServiceMode \
+    SoundRecorder \
+    Stk
 
 $(call inherit-product-if-exists, hardware/broadcom/wlan/bcmdhd/config/config-bcm.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
