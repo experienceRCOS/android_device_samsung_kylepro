@@ -18,6 +18,12 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+        <!-- The RadioAccessFamilies supported by the device.
+          Empty is viewed as "all".  Only used on devices which
+          don't support RIL_REQUEST_GET_RADIO_CAPABILITY
+          format is UMTS|LTE|... -->
+    <string translatable="false" name="config_radio_access_family">GSM|WCDMA</string>
+    
     <string-array name="config_locationProviderPackageNames" translatable="false">
          <!-- The Google provider -->
          <item>com.google.android.gms</item>
