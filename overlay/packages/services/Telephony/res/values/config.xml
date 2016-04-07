@@ -15,7 +15,7 @@
      limitations under the License.
 -->
 
-<resources xmlns:xliff="urnasis:names:tc:xliff:document:1.2 ">
+<resources>
     <!-- Determine whether calls to mute the microphone in PhoneUtils
          are routed through the android.media.AudioManager class (true) or through
          the com.android.internal.telephony.Phone interface (false). -->
