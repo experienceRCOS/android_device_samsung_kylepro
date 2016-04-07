@@ -28,6 +28,8 @@ on post-fs-data
 
     chmod 0777 /data/log
     chmod 0777 /data/anr
+    
+    restorecon_recursive /sys/devices/system/cpu/cpufreq/ondemand
 
 # For WIFI
     mkdir /efs/wifi 0775 radio system
