@@ -139,7 +139,7 @@ PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
     persist.sys.usb.config=mtp
 
 # Dalvik heap config
-include frameworks/native/build/phone-hdpi-512-dalvik-heap.mk
+include frameworks/native/build/phone-hdpi-dalvik-heap.mk
 
 # Boot animation
 PRODUCT_COPY_FILES += \
